@@ -9,7 +9,7 @@ class Blockchain:
         self.chain = []
         self.create_block(proof = 1, previous_hash = '0')
 
-    def create_bock(self, proof, previous_hash):
+    def create_block(self, proof, previous_hash):
         block = {'index': len(self.chain) + 1,
                  'timestamp': str(datetime.datetime.now()),
                  'proof': proof,
@@ -54,3 +54,17 @@ class Blockchain:
 app = Flask(__name__)
 
 blockchain = Blockchain()
+
+@app.route('/mine_block', methods = ['GET'])
+def mine_block():
+    previous_block = blockchain.get_previous_block()
+    previous_proof = previous_block['proof']
+    proof = blockchain.proof_of_work(previous_proof)
+    previous_hash = blockchain.hash(previous_block)
+    block = blockchain.create_block(proof, previous_hash)
+    response = {'message': 'First Block Mined!',
+                'index': block['index'],
+                'timestamp': block['timestamp'],
+                'proof': block['proof'],
+                'previous_hash': block[previous_hash]}
+    return jsonify(response), 200
